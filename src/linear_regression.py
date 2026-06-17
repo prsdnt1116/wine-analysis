@@ -58,15 +58,21 @@ try:
 except ModuleNotFoundError:
     from PIL import Image, ImageDraw, ImageFont
 
-    width, height = 900, 700
-    margin_left, margin_bottom = 100, 90
-    margin_right, margin_top = 50, 70
+    width, height = 1400, 1000
+    margin_left, margin_bottom = 150, 140
+    margin_right, margin_top = 90, 130
     plot_width = width - margin_left - margin_right
     plot_height = height - margin_top - margin_bottom
 
     image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
-    font = ImageFont.load_default()
+    try:
+        title_font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 32)
+        label_font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 24)
+        text_font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 20)
+        small_font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 18)
+    except OSError:
+        title_font = label_font = text_font = small_font = ImageFont.load_default()
 
     x_min, x_max = float(y_test.min()), float(y_test.max())
     y_min, y_max = float(y_pred.min()), float(y_pred.max())
@@ -82,23 +88,108 @@ except ModuleNotFoundError:
         return x, y
 
     draw.rectangle(
+        [0, 0, width - 1, height - 1],
+        outline="#d0d7de",
+    )
+
+    ticks = np.linspace(np.floor(axis_min), np.ceil(axis_max), 7)
+    for tick in ticks:
+        x_tick, _ = to_pixel(float(tick), axis_min)
+        _, y_tick = to_pixel(axis_min, float(tick))
+
+        draw.line(
+            [(x_tick, margin_top), (x_tick, margin_top + plot_height)],
+            fill="#e5e7eb",
+            width=1,
+        )
+        draw.line(
+            [(margin_left, y_tick), (margin_left + plot_width, y_tick)],
+            fill="#e5e7eb",
+            width=1,
+        )
+        draw.line(
+            [(x_tick, margin_top + plot_height), (x_tick, margin_top + plot_height + 10)],
+            fill="black",
+            width=2,
+        )
+        draw.line(
+            [(margin_left - 10, y_tick), (margin_left, y_tick)],
+            fill="black",
+            width=2,
+        )
+        draw.text(
+            (x_tick - 15, margin_top + plot_height + 18),
+            f"{tick:.1f}",
+            fill="#24292f",
+            font=small_font,
+        )
+        draw.text(
+            (margin_left - 60, y_tick - 7),
+            f"{tick:.1f}",
+            fill="#24292f",
+            font=small_font,
+        )
+
+    draw.rectangle(
         [margin_left, margin_top, margin_left + plot_width, margin_top + plot_height],
         outline="black",
+        width=2,
     )
     line_start = to_pixel(axis_min, axis_min)
     line_end = to_pixel(axis_max, axis_max)
-    draw.line([line_start, line_end], fill="red", width=3)
+    draw.line([line_start, line_end], fill="#d1242f", width=4)
 
     for actual, predicted in zip(y_test, y_pred):
         x, yy = to_pixel(float(actual), float(predicted))
-        draw.ellipse([x - 3, yy - 3, x + 3, yy + 3], fill="#2f6fbb")
+        draw.ellipse([x - 5, yy - 5, x + 5, yy + 5], fill="#0969da", outline="#054da7")
 
-    draw.text((width // 2 - 130, 25), "Wine Quality Linear Regression", fill="black", font=font)
-    draw.text((width // 2 - 45, height - 40), "Actual quality", fill="black", font=font)
-    draw.text((15, height // 2), "Predicted quality", fill="black", font=font)
-    draw.text((margin_left, height - 65), f"{axis_min:.1f}", fill="black", font=font)
-    draw.text((margin_left + plot_width - 30, height - 65), f"{axis_max:.1f}", fill="black", font=font)
-    draw.text((55, margin_top + plot_height - 8), f"{axis_min:.1f}", fill="black", font=font)
-    draw.text((55, margin_top - 8), f"{axis_max:.1f}", fill="black", font=font)
+    draw.text(
+        (margin_left, 45),
+        "Wine Quality Linear Regression: Actual vs Predicted",
+        fill="#24292f",
+        font=title_font,
+    )
+    draw.text(
+        (margin_left, 88),
+        f"Features: {', '.join(features)}",
+        fill="#57606a",
+        font=text_font,
+    )
+    draw.text(
+        (margin_left + plot_width - 260, margin_top + 30),
+        f"R2 = {r2:.3f}",
+        fill="#24292f",
+        font=text_font,
+    )
+    draw.text(
+        (margin_left + plot_width - 260, margin_top + 55),
+        f"MSE = {mse:.3f}",
+        fill="#24292f",
+        font=text_font,
+    )
+    draw.line(
+        [
+            (margin_left + plot_width - 260, margin_top + 95),
+            (margin_left + plot_width - 210, margin_top + 95),
+        ],
+        fill="#d1242f",
+        width=4,
+    )
+    draw.text(
+        (margin_left + plot_width - 200, margin_top + 87),
+        "ideal prediction",
+        fill="#24292f",
+        font=text_font,
+    )
+    draw.text(
+        (width // 2 - 90, height - 70),
+        "Actual quality",
+        fill="#24292f",
+        font=label_font,
+    )
+    y_label = Image.new("RGBA", (260, 45), (255, 255, 255, 0))
+    y_label_draw = ImageDraw.Draw(y_label)
+    y_label_draw.text((0, 0), "Predicted quality", fill="#24292f", font=label_font)
+    image.paste(y_label.rotate(90, expand=True), (35, height // 2 - 130), y_label.rotate(90, expand=True))
 
     image.save("linear_regression_result.png")
