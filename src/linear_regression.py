@@ -49,9 +49,9 @@ try:
     plt.figure(figsize=(7, 6))
     plt.scatter(y_test, y_pred, alpha=0.7)
     plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], "r--")
-    plt.xlabel("Actual quality")
-    plt.ylabel("Predicted quality")
-    plt.title("Wine Quality Linear Regression")
+    plt.xlabel("実際の品質")
+    plt.ylabel("予測した品質")
+    plt.title("ワイン品質の線形回帰: 実際の値と予測値")
     plt.tight_layout()
     plt.savefig("linear_regression_result.png", dpi=200)
     plt.show()
@@ -67,10 +67,10 @@ except ModuleNotFoundError:
     image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
     try:
-        title_font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 32)
-        label_font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 24)
-        text_font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 20)
-        small_font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 18)
+        title_font = ImageFont.truetype("C:/Windows/Fonts/YuGothB.ttc", 32)
+        label_font = ImageFont.truetype("C:/Windows/Fonts/YuGothB.ttc", 24)
+        text_font = ImageFont.truetype("C:/Windows/Fonts/YuGothM.ttc", 20)
+        small_font = ImageFont.truetype("C:/Windows/Fonts/YuGothM.ttc", 18)
     except OSError:
         title_font = label_font = text_font = small_font = ImageFont.load_default()
 
@@ -145,13 +145,13 @@ except ModuleNotFoundError:
 
     draw.text(
         (margin_left, 45),
-        "Wine Quality Linear Regression: Actual vs Predicted",
+        "ワイン品質の線形回帰: 実際の品質と予測した品質",
         fill="#24292f",
         font=title_font,
     )
     draw.text(
         (margin_left, 88),
-        f"Features: {', '.join(features)}",
+        "説明変数: アルコール度数, 揮発酸, 硫酸塩, クエン酸, 密度",
         fill="#57606a",
         font=text_font,
     )
@@ -177,19 +177,19 @@ except ModuleNotFoundError:
     )
     draw.text(
         (margin_left + plot_width - 200, margin_top + 87),
-        "ideal prediction",
+        "理想線",
         fill="#24292f",
         font=text_font,
     )
     draw.text(
         (width // 2 - 90, height - 70),
-        "Actual quality",
+        "実際の品質",
         fill="#24292f",
         font=label_font,
     )
     y_label = Image.new("RGBA", (260, 45), (255, 255, 255, 0))
     y_label_draw = ImageDraw.Draw(y_label)
-    y_label_draw.text((0, 0), "Predicted quality", fill="#24292f", font=label_font)
+    y_label_draw.text((0, 0), "予測した品質", fill="#24292f", font=label_font)
     image.paste(y_label.rotate(90, expand=True), (35, height // 2 - 130), y_label.rotate(90, expand=True))
 
     image.save("linear_regression_result.png")
